@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html style="height: 100%">
+<head>
+    <meta charset="utf-8">
+    <title>国产轿车销量对比统计</title>
+</head>
+<body style="height: 100%; padding: 10px;">
+<div id="container" style="height: 75%"></div>
+<div style="height: 25%; padding: 10px;">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label for="carName">车型名称</label>
+            <input type="text" class="form-control" id="carName" placeholder="车型名称，查询多个车型请用英文逗号间隔">
+        </div>
+        <div class="form-group">
+            <label for="start">查询时间</label>
+            <div class="row">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="start" placeholder="起始时间">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="end" placeholder="结束时间">
+                </div>
+            </div>
+
+        </div>
+        <div class="form-group">
+            <button class="btn btn-primary" onclick="showData();">查询</button>
+        </div>
+    </div>
+</div>
+<link href="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.bootcss.com/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdn.bootcss.com/echarts/4.1.0/echarts.min.js"></script>
+<script type="text/javascript">
+
+    var dom = document.getElementById("container");
+    var myChart = echarts.init(dom);
+    var app = {};
+    option = null;
+    option = {
+        title: {
+            text: '国产轿车销量对比统计'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['邮件营销', '联盟广告', '视频广告', '直接访问', '搜索引擎']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        toolbox: {
+            feature: {
+                saveAsImage: {}
+            }
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['周一', '周二', '周三', '周四', '周五', '周六', '周日']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: '邮件营销',
+                type: 'line',
+                stack: '总量',
+                data: [120, 132, 101, 134, 90, 230, 210]
+            },
+            {
+                name: '联盟广告',
+                type: 'line',
+                stack: '总量',
+                data: [220, 182, 191, 234, 290, 330, 310]
+            },
+            {
+                name: '视频广告',
+                type: 'line',
+                stack: '总量',
+                data: [150, 232, 201, 154, 190, 330, 410]
+            },
+            {
+                name: '直接访问',
+                type: 'line',
+                stack: '总量',
+                data: [320, 332, 301, 334, 390, 330, 320]
+            },
+            {
+                name: '搜索引擎',
+                type: 'line',
+                stack: '总量',
+                data: [820, 932, 901, 934, 1290, 1330, 1320]
+            }
+        ]
+    };
+    ;
+    if (option && typeof option === "object") {
+        myChart.setOption(option, true);
+    }
+
+    function showData() {
+        var data = {
+            name: $("#carName").val(),
+            start: $("#start").val(),
+            end: $("#end").val()
+        }
+        $.ajax({
+            url: "/getSalesData",
+            data: data,
+            success: function (json) {
+                var nameList = [];
+                var timeList = [];
+                var seriesData = {};
+                for (var i = 0; i < json.length; i++) {
+                    var name = json[i].carName;
+                    var time = json[i].time;
+                    var count = json[i].count;
+                    if (nameList.indexOf(name) < 0) {
+                        nameList.push(name);
+                    }
+                    if (timeList.indexOf(time) < 0) {
+                        timeList.push(time);
+                    }
+                    if (!seriesData.hasOwnProperty(name)) {
+                        seriesData[name] = [];
+                    }
+                    seriesData[name].push(count);
+                }
+                option.legend.data = nameList;
+                option.xAxis.data = timeList;
+                option.series = [];
+                for(var name in seriesData){
+                    var data = seriesData[name];
+                    option.series.push({
+                        name: name,
+                        type: "line",
+                        data : data
+                    });
+                }
+                myChart.setOption(option, true);
+            }
+        });
+    }
+
+</script>
+</body>
+</html>
