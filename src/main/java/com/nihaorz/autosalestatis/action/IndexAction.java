@@ -79,30 +79,24 @@ public class IndexAction {
                         Element element = doc.select(".table-sl").first();
                         Elements elements = element.select("tr");
                         for (String name : nameList) {
-                            boolean existCar = false;
+                            int salesNum = 0;
+                            String[] nameArr = name.split("\\|");
                             for (Element tr : elements) {
                                 /**
                                  * 车型
                                  */
                                 String carName = tr.select(".brand").text();
-                                String[] nameArr = name.split("\\|");
                                 for (String s : nameArr) {
                                     if (carName.equalsIgnoreCase(s)) {
-                                        existCar = true;
                                         /**
                                          * 销量
                                          */
-                                        Integer salesNum = Integer.parseInt(tr.select(".salesNum").text());
-                                        CarScalesData carScalesData = new CarScalesData.Builder().carName(name).count(salesNum).time(year + splitStr + month).build();
-                                        list.add(carScalesData);
-                                        break;
+                                        salesNum += Integer.parseInt(tr.select(".salesNum").text());
                                     }
                                 }
                             }
-                            if (!existCar) {
-                                CarScalesData carScalesData = new CarScalesData.Builder().carName(name).count(0).time(year + splitStr + month).build();
-                                list.add(carScalesData);
-                            }
+                            CarScalesData carScalesData = new CarScalesData.Builder().carName(name).count(salesNum).time(year + splitStr + month).build();
+                            list.add(carScalesData);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
